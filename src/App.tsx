@@ -1,21 +1,34 @@
+// Typescript
+import { ChangeEvent } from 'react';
+
 // importing the useState hook so we can use state in functions
 import { useState, useEffect } from 'react';
-import Search from './components/search-box/search-box.component.jsx';
+import Search from './components/search-box/search-box.component';
 import './App.css';
-import CardList from './components/card-list/card-list.component.jsx';
+import CardList from './components/card-list/card-list.component';
+import { getData } from './utils/data.utils';
+
+export type Monster = {
+  id: string;
+  name: string;
+  email: string;
+}
 
 // in functional components, the whole function will get run every time we change the state of the component, but in class components, only the changes necessary are made and the render method gets re-run with the changes
 const App = () => {
 
   const [searchField, setSearchField] = useState(''); // we put the default value of 'searchField' in useState's parenthesis
 
-  const [monsters, setMonsters] = useState([]);
+  const [monsters, setMonsters] = useState<Monster[]>([]);
   const [filteredMonsters, setFilteredMonsters] = useState(monsters);
   
   useEffect(() => {
-    fetch('https://jsonplaceholder.typicode.com/users')
-      .then((response) => response.json())
-      .then((users) => setMonsters(users));
+    const fetchUsers = async () => {
+      const monsters = await getData<Monster[]>('https://jsonplaceholder.typicode.com/users');
+      setMonsters(monsters);
+    }
+
+    fetchUsers();
   }, []);
   // will re-run if the values inside the array change, if passed no parameters to array, it will only run the first time that this function is called
 
@@ -27,7 +40,7 @@ const App = () => {
     setFilteredMonsters(newFilteredMonsters);
   }, [monsters, searchField]);
 
-  const onSearchChange = (event) => {
+  const onSearchChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const searchValue = event.target.value.toLowerCase();
     setSearchField(searchValue);
   }
